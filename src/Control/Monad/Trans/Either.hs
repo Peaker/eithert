@@ -1,8 +1,6 @@
 {-# OPTIONS -Wall -O2 -fno-warn-orphans #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 
--- Exports Applicative/Monad instances for Either
-module Control.Monad.Either(EitherT(..), left) where
+module Control.Monad.Trans.Either(EitherT(..), left) where
 
 import Control.Monad(liftM)
 import Control.Monad.Trans(MonadTrans(..))
@@ -37,17 +35,6 @@ instance Monad m => Monad (EitherT l m) where
 
 instance MonadTrans (EitherT l) where
   lift = EitherT . liftM Right
-
-instance Applicative (Either l) where
-  pure = Right
-  Right f <*> Right x = Right (f x)
-  Left e <*> _ = Left e
-  _ <*> Left e = Left e
-
-instance Monad (Either l) where
-  return = pure
-  Right x >>= f = f x
-  Left e >>= _ = Left e
 
 instance Functor f => Functor (EitherT l f) where
   fmap = inEitherT1 . fmap . fmap
