@@ -2,6 +2,7 @@
 
 module Control.Monad.Trans.Either(EitherT(..), left) where
 
+import Data.Monoid(Monoid(..))
 import Control.Monad(liftM)
 import Control.Monad.Trans(MonadTrans(..))
 import Control.Monad.Instances()
@@ -44,3 +45,7 @@ instance Applicative f => Applicative (EitherT l f) where
 
 instance (MonadIO m) => MonadIO (EitherT l m) where
   liftIO = lift . liftIO
+
+instance (Applicative m, Monoid a) => Monoid (EitherT l m a) where
+  mempty = pure mempty
+  mappend = liftA2 mappend
