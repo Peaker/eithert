@@ -10,6 +10,6 @@ Maintainer:          Eyal Lotem <eyal.lotem+hackage@gmail.com>
 Stability:           experimental
 Build-Type:          Simple
 HS-Source-Dirs:      src
-Build-Depends:       base >= 4 && < 5, mtl >= 2.0 && < 2.1, transformers-base >= 0.4 && < 0.5, monad-control >= 0.3 && < 0.4
+Build-Depends:       base >= 4, transformers >= 0.2, transformers-base >= 0.4, monad-control >= 0.3
 Exposed-modules:     Control.Monad.Trans.Either
 ghc-options:         -Wall

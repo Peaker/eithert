@@ -6,9 +6,9 @@ module Control.Monad.Trans.Either(EitherT(..), left) where
 
 import Data.Monoid(Monoid(..))
 import Control.Monad(liftM)
-import Control.Monad.Trans(MonadTrans(..))
+import Control.Monad.Trans.Class(MonadTrans(..))
 import Control.Monad.Instances()
-import Control.Monad.Trans(MonadIO(..))
+import Control.Monad.IO.Class(MonadIO(..))
 import Control.Applicative(Applicative(..), liftA2)
 import Control.Monad.Base
 import Control.Monad.Trans.Control
