@@ -1,4 +1,6 @@
 {-# OPTIONS -Wall -O2 -fno-warn-orphans #-}
+{-# LANGUAGE CPP, FlexibleInstances, MultiParamTypeClasses,
+             UndecidableInstances, TypeFamilies #-}
 
 module Control.Monad.Trans.Either(EitherT(..), left) where
 
@@ -8,6 +10,8 @@ import Control.Monad.Trans(MonadTrans(..))
 import Control.Monad.Instances()
 import Control.Monad.Trans(MonadIO(..))
 import Control.Applicative(Applicative(..), liftA2)
+import Control.Monad.Base
+import Control.Monad.Trans.Control
 
 newtype EitherT l m a = EitherT { runEitherT :: m (Either l a) }
 inEitherT0 :: m (Either l a) -> EitherT l m a
@@ -49,3 +53,35 @@ instance (MonadIO m) => MonadIO (EitherT l m) where
 instance (Applicative m, Monoid a) => Monoid (EitherT l m a) where
   mempty = pure mempty
   mappend = liftA2 mappend
+
+instance MonadBase b m => MonadBase b (EitherT l m) where
+    liftBase = liftBaseDefault
+
+instance MonadTransControl (EitherT l) where
+    newtype StT (EitherT l) r = StEither {unStEither :: Either l r}
+    liftWith f = EitherT $ liftM return $ f $ liftM StEither . runEitherT
+    restoreT = EitherT . liftM unStEither
+    {-# INLINE liftWith #-}
+    {-# INLINE restoreT #-}
+{-
+instance (MonadBaseControl b m) => MonadBaseControl b (Either l m) where
+    newType StM (EitherT l m) a = StMEither { unStMEither :: ComposeSt (EitherT l) m a }
+    liftBaseWith = defaultLiftBaseWith StMEither
+    restoreM = defaultRestoreM unSTMEither
+    {-# INLINE liftBaseWith #-}
+    {-# INLINE restoreM #-}
+-}
+
+--Copied from monad-control-0.3.1.1.
+#define BODY(T, ST, unST) {                              \
+    newtype StM (T m) a = ST {unST :: ComposeSt (T) m a}; \
+    liftBaseWith = defaultLiftBaseWith ST;               \
+    restoreM     = defaultRestoreM   unST;               \
+    {-# INLINE liftBaseWith #-};                         \
+    {-# INLINE restoreM #-}}
+
+--Copied from monad-control-0.3.1.1.
+#define TRANS(         T, ST, unST) \
+  instance (     MonadBaseControl b m) => MonadBaseControl b (T m) where BODY(T, ST, unST)
+
+TRANS(EitherT l, StMEither, unStMEither)
